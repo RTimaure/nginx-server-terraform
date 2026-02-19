@@ -41,7 +41,7 @@ resource "aws_instance" "nginx_server2" {
                 sudo systemctl enable nginx
             EOF
     key_name = aws_key_pair.nginx-server-ssh.key_name
-    
+
     vpc_security_group_ids = [
         aws_security_group.nginx-server-sg.id
      ]
@@ -86,5 +86,6 @@ resource "aws_security_group" "nginx-server-sg" {
         to_port     = 0
         protocol    = "-1"
         cidr_blocks = ["0.0.0.0/0"]
+        
     }
 }
