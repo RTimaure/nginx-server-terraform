@@ -33,6 +33,8 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_instance" "nginx_server2" {
     ami = "ami-0440d3b780d96b29d"
     instance_type = "t3.micro"
+    subnet_id     = aws_subnet.public_subnet.id
+    associate_public_ip_address = true  #   Asegura que la instancia tenga una IP pública para acceder a ella desde Internet
     # Instalamos nginx usando user_data para que se ejecute al iniciar la instancia
     user_data = <<-EOF
                 #!/bin/bash
@@ -48,7 +50,7 @@ resource "aws_instance" "nginx_server2" {
      ]
 
     # VINCULACIÓN: Aquí solucionamos el error api error VPCIdNotSpecified
-    subnet_id     = aws_subnet.public_subnet.id
+
     tags = {
         Name = "nginx-server-terraform"
   }
@@ -101,7 +103,7 @@ resource "aws_security_group" "nginx-server-sg" {
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
-    
+
     #El bloque de egress define las reglas de salida para el grupo de seguridad
     egress {
         # El bloque de egress permite todo el tráfico saliente
