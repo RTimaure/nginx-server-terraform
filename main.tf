@@ -18,6 +18,7 @@ resource "aws_subnet" "public_subnet" {
     vpc_id            = aws_vpc.main_vpc.id
     cidr_block        = "10.0.1.0/24"
     availability_zone = "us-east-1a" # Asegúrate que coincida con tu región
+    map_public_ip_on_launch = true # Asigna IP pública automáticamente a las instancias en esta subred
     tags = {
         Name = "subnet-public-1"
   }
@@ -45,7 +46,6 @@ resource "aws_instance" "nginx_server2" {
     vpc_security_group_ids = [
         aws_security_group.nginx-server-sg.id
      ]
-    
 
     # VINCULACIÓN: Aquí solucionamos el error api error VPCIdNotSpecified
     subnet_id     = aws_subnet.public_subnet.id
@@ -54,16 +54,39 @@ resource "aws_instance" "nginx_server2" {
   }
 } 
 
+# Crear la tabla de rutas
+resource "aws_route_table" "public_rt" {
+  vpc_id = aws_vpc.main_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+  tags = {
+    Name = "public-route-table"
+  }
+}
+
+# Asociar la tabla de rutas con la subred
+resource "aws_route_table_association" "public_assoc" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+# Crear un par de claves para SSH 
 resource "aws_key_pair" "nginx-server-ssh" {
     key_name   = "nginx-server-ssh"
     public_key = file("nginx-server.key.pub")
 }
 
+# Crear un grupo de seguridad para permitir tráfico HTTP y SSH
 resource "aws_security_group" "nginx-server-sg" {
     name        = "nginx-server-sg"
     description = "Allow HTTP and SSH traffic"
     vpc_id      = aws_vpc.main_vpc.id
 
+    # El bloque de ingress define las reglas de entrada para el grupo de seguridad
     ingress {
         from_port   = 80
         to_port     = 80
@@ -76,16 +99,16 @@ resource "aws_security_group" "nginx-server-sg" {
         from_port   = 22
         to_port     = 22
         protocol    = "tcp"
-        # 0.0.0.0/0" significa que se permite el tráfico desde cualquier dirección IP
         cidr_blocks = ["0.0.0.0/0"]
     }
-
+    
+    #El bloque de egress define las reglas de salida para el grupo de seguridad
     egress {
         # El bloque de egress permite todo el tráfico saliente
         from_port   = 0
         to_port     = 0
         protocol    = "-1"
         cidr_blocks = ["0.0.0.0/0"]
-        
+
     }
 }
