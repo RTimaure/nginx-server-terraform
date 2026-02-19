@@ -10,3 +10,4 @@
 *.tfvars.json
 override.tf
 override.tf.json
+nginx-server.key

@@ -32,6 +32,20 @@ resource "aws_internet_gateway" "igw" {
 resource "aws_instance" "nginx_server2" {
     ami = "ami-0440d3b780d96b29d"
     instance_type = "t3.micro"
+    # Instalamos nginx usando user_data para que se ejecute al iniciar la instancia
+    user_data = <<-EOF
+                #!/bin/bash
+                sudo apt update -y
+                sudo apt install nginx -y
+                sudo systemctl start nginx
+                sudo systemctl enable nginx
+            EOF
+    key_name = aws_key_pair.nginx-server-ssh.key_name
+    
+    vpc_security_group_ids = [
+        aws_security_group.nginx-server-sg.id
+     ]
+    
 
     # VINCULACIÓN: Aquí solucionamos el error api error VPCIdNotSpecified
     subnet_id     = aws_subnet.public_subnet.id
@@ -39,3 +53,38 @@ resource "aws_instance" "nginx_server2" {
         Name = "nginx-server-terraform"
   }
 } 
+
+resource "aws_key_pair" "nginx-server-ssh" {
+    key_name   = "nginx-server-ssh"
+    public_key = file("nginx-server.key.pub")
+}
+
+resource "aws_security_group" "nginx-server-sg" {
+    name        = "nginx-server-sg"
+    description = "Allow HTTP and SSH traffic"
+    vpc_id      = aws_vpc.main_vpc.id
+
+    ingress {
+        from_port   = 80
+        to_port     = 80
+        protocol    = "tcp"
+        # 0.0.0.0/0" significa que se permite el tráfico desde cualquier dirección IP
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    ingress {
+        from_port   = 22
+        to_port     = 22
+        protocol    = "tcp"
+        # 0.0.0.0/0" significa que se permite el tráfico desde cualquier dirección IP
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+
+    egress {
+        # El bloque de egress permite todo el tráfico saliente
+        from_port   = 0
+        to_port     = 0
+        protocol    = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+}
