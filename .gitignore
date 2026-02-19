@@ -1,0 +1,12 @@
+# Ignorar la carpeta de binarios y módulos de Terraform
+.terraform/
+
+# Ignorar el archivo de estado (¡MUY IMPORTANTE POR SEGURIDAD!)
+*.tfstate
+*.tfstate.backup
+
+# Ignorar archivos de variables con secretos
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
