@@ -38,10 +38,13 @@ resource "aws_instance" "nginx_server2" {
     # Instalamos nginx usando user_data para que se ejecute al iniciar la instancia
     user_data = <<-EOF
                 #!/bin/bash
+                exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1 
+                echo "Iniciando despliegue de Nginx..."
                 sudo apt update -y
                 sudo apt install nginx -y
-                sudo systemctl start nginx
                 sudo systemctl enable nginx
+                sudo systemctl start nginx
+
             EOF
     key_name = aws_key_pair.nginx-server-ssh.key_name
 
