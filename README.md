@@ -7,9 +7,9 @@
                        |_|   |______||_|  \_\|_|  \_\/_/    \_\|_|     \____/ |_|  \_\|_|  |_|
 
                        Proyecto de Infraestructura como codigo (IaC) usando el provider AWS
-                       1️⃣ **Maquinas Virtuales** (VM): 1
-                       2️⃣ **VPC:** 1 | 10.0.0.0/16
-                       3️⃣ **Subnet:** 1 | 10.0.0.0/24
+                       1️⃣ **Maquinas Virtuales** (VM): nginx-server-terraform | ami-0440d3b780d96b29d | t3.micro
+                       2️⃣ **VPC:** vpc-terraform-lab | 10.0.0.0/16
+                       3️⃣ **Subnet:**: subnet-public-1| 10.0.1.0/24
                        4️⃣ **Gateway:** 1 
                        5️⃣
                        6️⃣
