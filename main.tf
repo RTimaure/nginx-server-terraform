@@ -114,3 +114,9 @@ resource "aws_security_group" "nginx-server-sg" {
 
     }
 }
+
+# Salida para mostrar la IP pública de la instancia de Nginx
+output "url_nginx" {
+  description = "URL para acceder a Nginx"
+  value       = "http://${aws_instance.nginx_server2.public_ip}"
+}
